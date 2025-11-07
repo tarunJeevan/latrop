@@ -73,3 +73,12 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Zed Text Editor Configs
+
+.zed
+
+# Added by cargo
+
+/target
+Cargo.lock
