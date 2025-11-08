@@ -1,4 +1,8 @@
-use bevy::{DefaultPlugins, app::Startup, ecs::system::Commands, prelude::{PluginGroup, App, default}, window::{Window, WindowPlugin}};
+use bevy::{pbr::wireframe::{WireframePlugin}, DefaultPlugins, app::Startup, ecs::system::Commands, prelude::{PluginGroup, App, default}, window::{Window, WindowPlugin}};
+
+mod scene_plugin;
+
+use crate::{scene_plugin::ScenePlugin};
 
 fn main() {
     App::new()
@@ -10,6 +14,9 @@ fn main() {
                     ..default()
                 }),
                 ..default()}),
+            #[cfg(not(target_arch = "wasm32"))]
+            WireframePlugin::default(),
+            ScenePlugin,
         ))
         .add_systems(Startup, setup)
         .run();
