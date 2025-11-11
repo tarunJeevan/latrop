@@ -1,4 +1,6 @@
-use bevy::{app::Update, camera::Camera3d, color::palettes::css::SILVER, input::{ButtonInput, keyboard::KeyCode}, math::{Vec3, primitives::Plane3d}, pbr::{MeshMaterial3d, wireframe::WireframeConfig}, prelude::{App, Assets, Color, Commands, Mesh, Mesh3d, Meshable, Plugin, PositionType, Res, ResMut, StandardMaterial, Startup, default}, transform::components::Transform, ui::{Node, px, widget::Text}};
+use bevy::{app::Update, camera::{visibility::RenderLayers}, color::palettes::{tailwind}, input::{ButtonInput, keyboard::KeyCode}, light::PointLight, math::{Vec2, Vec3, primitives::{Cuboid, Plane3d}}, pbr::{MeshMaterial3d, wireframe::WireframeConfig}, prelude::{App, Assets, Color, Commands, Mesh, Mesh3d,  Plugin, Res, ResMut, StandardMaterial, Startup, default}, transform::components::Transform};
+
+use crate::components::{DEFAULT_RENDER_LAYER, VIEW_MODEL_RENDER_LAYER};
 
 const PLANE_X: f32 = 1000.0;
 const PLANE_Y: f32 = 1000.0;
@@ -9,7 +11,7 @@ pub struct ScenePlugin;
 impl Plugin for ScenePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, setup)
+            .add_systems(Startup, (setup, spawn_lights))
             .add_systems(Update, toggle_wireframe);
     }
 }
@@ -19,28 +21,36 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-
-    // ground plane
+    let floor = meshes.add(Plane3d::new(Vec3::Y, Vec2::splat(10.0)));
+    let cube = meshes.add(Cuboid::new(2.0, 0.5, 1.0));
+    let material = materials.add(Color::WHITE);
+    
+    commands.spawn((Mesh3d(floor), MeshMaterial3d(material.clone())));
+    
     commands.spawn((
-        Mesh3d(meshes.add(Plane3d::default().mesh().size(PLANE_X, PLANE_Y).subdivisions(PLANE_SUB_DIVISIONS))),
-        MeshMaterial3d(materials.add(Color::from(SILVER))),
+        Mesh3d(cube.clone()),
+        MeshMaterial3d(material.clone()),
+        Transform::from_xyz(0.0, 0.25, -3.0),
     ));
     
-    // camera positioned slightly above the ground plane
     commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(0.0, 10.0, 14.0).looking_at(Vec3::new(0.0, 1.0, 0.0), Vec3::Y),
+        Mesh3d(cube),
+        MeshMaterial3d(material),
+        Transform::from_xyz(0.75, 1.75, 0.0)
     ));
 
-    #[cfg(not(target_arch = "wasm32"))]
+}
+
+fn spawn_lights(mut commands: Commands) {
     commands.spawn((
-        Text::new("Press space to toggle wireframes"),
-        Node {
-            position_type: PositionType::Absolute,
-            top: px(12),
-            left: px(12),
+        PointLight {
+            color: Color::from(tailwind::ROSE_300),
+            shadows_enabled: true,
             ..default()
         },
+        Transform::from_xyz(-2.0, 4.0, -0.75),
+        // The light source illuminates both the world model and the view model
+        RenderLayers::from_layers(&[DEFAULT_RENDER_LAYER, VIEW_MODEL_RENDER_LAYER]),
     ));
 }
 
