@@ -1,8 +1,11 @@
 use bevy::{pbr::wireframe::{WireframePlugin}, DefaultPlugins, app::Startup, ecs::system::Commands, prelude::{PluginGroup, App, default}, window::{Window, WindowPlugin}};
 
 mod scene_plugin;
+mod physics;
+mod components;
+mod player_plugin;
 
-use crate::{scene_plugin::ScenePlugin};
+use crate::{scene_plugin::ScenePlugin, player_plugin::PlayerPlugin, physics::PhysicsPlugin, components::{}};
 
 fn main() {
     App::new()
@@ -17,6 +20,8 @@ fn main() {
             #[cfg(not(target_arch = "wasm32"))]
             WireframePlugin::default(),
             ScenePlugin,
+            PhysicsPlugin,
+            PlayerPlugin,
         ))
         .add_systems(Startup, setup)
         .run();
