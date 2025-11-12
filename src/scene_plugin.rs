@@ -1,18 +1,14 @@
-use bevy::{app::Update, camera::{visibility::RenderLayers}, color::palettes::{tailwind}, input::{ButtonInput, keyboard::KeyCode}, light::PointLight, math::{Vec2, Vec3, primitives::{Cuboid, Plane3d}}, pbr::{MeshMaterial3d, wireframe::WireframeConfig}, prelude::{App, Assets, Color, Commands, Mesh, Mesh3d,  Plugin, Res, ResMut, StandardMaterial, Startup, default}, transform::components::Transform};
+use bevy::{app::Update, camera::visibility::RenderLayers, color::palettes::tailwind, ecs::{system::{Single}}, input::{ButtonInput, keyboard::KeyCode}, light::PointLight, math::{Vec2, Vec3, primitives::{Cuboid, Plane3d}}, pbr::{MeshMaterial3d, wireframe::WireframeConfig}, prelude::{App, Assets, Color, Commands, Mesh, Mesh3d,  Plugin, Res, ResMut, StandardMaterial, Startup, default}, transform::components::Transform, window::{CursorGrabMode, CursorOptions}};
 
 use crate::components::{DEFAULT_RENDER_LAYER, VIEW_MODEL_RENDER_LAYER};
-
-const PLANE_X: f32 = 1000.0;
-const PLANE_Y: f32 = 1000.0;
-const PLANE_SUB_DIVISIONS: u32 = 10;
 
 pub struct ScenePlugin;
 
 impl Plugin for ScenePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, (setup, spawn_lights))
-            .add_systems(Update, toggle_wireframe);
+            .add_systems(Startup, (setup, spawn_lights, grab_mouse_cursor))
+            .add_systems(Update, (toggle_wireframe, toggle_mouse_cursor_on_esc));
     }
 }
 
@@ -63,4 +59,23 @@ fn toggle_wireframe(
     if keyboard.just_pressed(KeyCode::Space) {
         wireframe_config.global = !wireframe_config.global;
     }
+}
+
+/// Toggles mouse cursor on pressing the Escape key and unlocks the mouse cursor
+fn toggle_mouse_cursor_on_esc(
+    mut cursor_options: Single<&mut CursorOptions>,
+    key: Res<ButtonInput<KeyCode>>,
+) {
+    if key.just_pressed(KeyCode::Escape) {
+        cursor_options.visible = !cursor_options.visible;
+        cursor_options.grab_mode = CursorGrabMode::None;
+    }
+}
+
+/// Hides the mouse cursor on game start and locks the mouse cursor
+fn grab_mouse_cursor(
+    mut cursor_options: Single<&mut CursorOptions>,
+) {
+    cursor_options.visible = false;
+    cursor_options.grab_mode = CursorGrabMode::Locked;
 }
