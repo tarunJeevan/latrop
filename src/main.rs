@@ -1,11 +1,11 @@
-use bevy::{pbr::wireframe::{WireframePlugin}, DefaultPlugins, app::Startup, ecs::system::Commands, prelude::{PluginGroup, App, default}, window::{Window, WindowPlugin}};
+use bevy::{pbr::wireframe::{WireframePlugin}, DefaultPlugins, prelude::{PluginGroup, App, default}, window::{Window, WindowPlugin}};
 
 mod scene_plugin;
 mod physics;
 mod components;
 mod player_plugin;
 
-use crate::{scene_plugin::ScenePlugin, player_plugin::PlayerPlugin, physics::PhysicsPlugin, components::{}};
+use crate::{scene_plugin::ScenePlugin, player_plugin::PlayerPlugin, physics::PhysicsPlugin};
 
 fn main() {
     App::new()
@@ -23,12 +23,5 @@ fn main() {
             PhysicsPlugin,
             PlayerPlugin,
         ))
-        .add_systems(Startup, setup)
         .run();
-}
-
-fn setup (
-    mut commands: Commands,
-) {
-    
 }
